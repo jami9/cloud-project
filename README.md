@@ -15,102 +15,137 @@ Ce projet propose une approche basée sur l’intégration de plusieurs outils m
 
 ## Description du projet
 
-L’objectif principal est de développer une **architecture distribuée** composée de plusieurs machines virtuelles permettant de gérer dynamiquement une infrastructure cloud via une interface graphique intuitive.
+L’objectif principal est de développer une **architecture distribuée** composée de plusieurs machines virtuelles permettant de gérer dynamiquement une infrastructure cloud via une interface graphique et une API centralisée.
 
-### Architecture
+---
 
-Le système repose sur trois composants principaux :
+## Architecture globale
 
-### 1️ API Gateway
-- Point d’entrée principal du système  
-- Centralisation des requêtes utilisateurs  
-- Interface web dynamique  
-- Gestion des actions :
-  - Création de ressources
-  - Suppression
-  - Consultation
+Le système repose sur trois machines virtuelles principales :
 
-### 2️ Plateforme Cloud (OpenStack - MicroStack)
+### VM1 — Infrastructure Cloud (OpenStack MicroStack + Kubernetes + Terraform)
+- Mise en place d’un cluster Kubernetes sur OpenStack (MicroStack)
+- Provisioning automatique des ressources avec **Terraform**
 - Gestion des ressources IaaS :
   - Machines virtuelles
   - Réseaux
-  - Stockage  
-- Simulation d’un environnement cloud réel  
+  - Stockage
+- Base de l’infrastructure cloud privée
 
-### 3️ Orchestrateur (OpenShift - OKD)
-- Gestion des applications conteneurisées  
-- Basé sur Kubernetes  
-- Déploiement automatisé des applications  
+---
+
+### VM2 — Dashboard & API Gateway (Kong)
+- Interface web de gestion du cloud
+- API Gateway basée sur **Kong**
+- Accès centralisé aux services OpenStack et Kubernetes
+- Gestion des requêtes :
+  - Création / suppression de ressources
+  - Monitoring de l’infrastructure
+- Communication avec VM1 via API sécurisée
+
+---
+
+### VM3 — Plateforme Orchestrateur (OpenShift OKD)
+- Mise en place d’un cluster Kubernetes avec **OpenShift OKD**
+- Déploiement et gestion des applications conteneurisées
+- Orchestration des workloads
+- Intégration dans l’infrastructure MicroStack
 
 ---
 
 ## Fonctionnement global
 
-Le système suit une **architecture orientée services** :
+L’architecture suit un modèle **cloud hybride et distribué** :
 
-- L’utilisateur interagit uniquement avec l’interface de l’API Gateway  
-- L’API Gateway communique avec :
-  - OpenStack (IaaS)
-  - OpenShift (PaaS)
+- L’utilisateur interagit uniquement avec le **Dashboard (VM2)**
+- Le Dashboard passe par l’API Gateway **Kong**
+- Les requêtes sont redirigées vers :
+  - VM1 (OpenStack + Kubernetes + Terraform)
+  - VM3 (OpenShift OKD)
 
-### Fonctionnalités
+---
 
-- Création et suppression des machines virtuelles  
-- Supervision de l’infrastructure  
-- Déploiement d’applications conteneurisées  
-- Gestion dynamique des ressources  
+## Partie 1 du projet
+
+La première partie consiste à :
+
+- Déployer un **cluster Kubernetes sur VM1**
+- Utiliser **OpenStack MicroStack** comme infrastructure cloud
+- Automatiser le provisioning avec **Terraform**
+- Accéder à l’infrastructure via le **dashboard (VM2)**
+- Centraliser les appels API via **Kong Gateway**
+
+Objectif : construire une infrastructure cloud IaaS fonctionnelle et automatisée.
+
+---
+
+## Partie 2 du projet
+
+La deuxième partie consiste à :
+
+- Déployer une **VM3 dédiée à OpenShift OKD**
+- Créer un cluster Kubernetes avec OpenShift
+- Intégrer OpenShift dans l’infrastructure MicroStack
+- Permettre le déploiement d’applications conteneurisées
+- Tester l’orchestration et la gestion des workloads
+
+Objectif : ajouter une couche PaaS complète à l’architecture cloud.
 
 ---
 
 ## Objectifs du projet
 
-- Mettre en place une infrastructure cloud simulée  
-- Développer une interface de gestion centralisée  
-- Automatiser les tâches d’administration  
-- Comprendre l’intégration entre IaaS et PaaS  
-- Appliquer les concepts DevOps  
+- Mettre en place une infrastructure cloud complète (IaaS + PaaS)
+- Automatiser le déploiement des ressources
+- Développer une interface de gestion centralisée
+- Comprendre l’intégration Kubernetes / OpenStack / OpenShift
+- Appliquer les principes DevOps et Cloud Computing
 
 ---
 
 ## Contraintes et choix techniques
 
-- Ressources matérielles limitées (RAM)  
-- Exécution **séquentielle des VMs**  
-- Optimisation de l’utilisation des ressources  
-
-Cette approche permet de simuler un environnement cloud réel avec des moyens limités.
+- Ressources matérielles limitées (RAM et CPU)
+- Utilisation de plusieurs VMs sur une seule infrastructure
+- Optimisation des déploiements
+- Architecture distribuée simulée en environnement local
 
 ---
 
 ## Technologies utilisées
 
-- OpenStack (MicroStack)  
-- OpenShift (OKD)  
-- Kubernetes  
-- API REST  
-- Linux / Ubuntu Server  
-- Virtualisation  
+- OpenStack (MicroStack)
+- Terraform
+- Kubernetes
+- OpenShift OKD
+- Kong API Gateway
+- REST APIs
+- Linux / Ubuntu Server
+- Virtualisation
 
 ---
 
 ## Résultats attendus
 
-- Plateforme de gestion centralisée  
-- Automatisation du déploiement  
-- Interface utilisateur intuitive  
+- Infrastructure cloud hybride fonctionnelle
+- Dashboard centralisé de gestion
+- Automatisation complète des déploiements
+- Intégration OpenStack + Kubernetes + OpenShift
+- Architecture proche des environnements professionnels
 
 ---
 
 ## Conclusion
 
-Ce projet représente une mise en pratique des concepts clés du cloud computing :
+Ce projet permet de mettre en pratique les concepts fondamentaux du cloud computing :
 
-- Virtualisation  
-- Orchestration  
-- Automatisation  
-- DevOps  
+- Virtualisation
+- Orchestration
+- Automatisation
+- Infrastructure as Code
+- DevOps
 
-Il constitue une base solide pour travailler sur des infrastructures cloud professionnelles.
+Il constitue une architecture complète représentant un environnement cloud moderne et évolutif.
 
 ---
 
@@ -123,4 +158,4 @@ Ingénieure en informatique – Infrastructure & Réseaux
 
 ## Licence
 
-Ce projet est réalisé dans un cadre académique.
+Projet académique réalisé dans un cadre de formation.
