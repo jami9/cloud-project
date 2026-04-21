@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenStack Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── Variables thème ─────────────────────────────────────── */
+:root {
+  --accent: #f97316;
+  --accent2: #fb923c;
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 6px;
+  --transition: 0.2s ease;
+}
+[data-theme="dark"] {
+  --bg:       #0a0a0a;
+  --bg2:      #111111;
+  --bg3:      #1a1a1a;
+  --bg4:      #242424;
+  --border:   #2a2a2a;
+  --text:     #f0f0f0;
+  --text2:    #999;
+  --text3:    #666;
+  --shadow:   0 4px 24px rgba(0,0,0,0.6);
+}
+[data-theme="light"] {
+  --bg:       #f8f7f4;
+  --bg2:      #ffffff;
+  --bg3:      #f0efeb;
+  --bg4:      #e8e7e3;
+  --border:   #ddd;
+  --text:     #1a1a1a;
+  --text2:    #555;
+  --text3:    #888;
+  --shadow:   0 4px 24px rgba(0,0,0,0.08);
+}
+
+/* ── Reset ───────────────────────────────────────────────── */
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: var(--font-display);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+}
+.sidebar-logo {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo .logo-mark {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.sidebar-logo h1 {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.sidebar-logo p {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+
+.nav-group {
+  padding: 12px 8px 4px;
+}
+.nav-group-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  transition: var(--transition);
+  margin-bottom: 2px;
+  user-select: none;
+}
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active {
+  background: rgba(249,115,22,0.12);
+  color: var(--accent);
+  border-left: 2px solid var(--accent);
+}
+.nav-item .nav-icon { width: 16px; text-align: center; font-size: 13px; }
+
+/* ── Main ────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Topbar ──────────────────────────────────────────────── */
+.topbar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.topbar-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.status-label {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+}
+
+/* ── Content ─────────────────────────────────────────────── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* ── Section ─────────────────────────────────────────────── */
+.section { display: none; }
+.section.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.section-title span {
+  color: var(--accent);
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: var(--transition);
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-danger { background: rgba(239,68,68,0.15); color: #ef4444; }
+.btn-danger:hover { background: rgba(239,68,68,0.3); }
+.btn-green  { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.btn-orange { background: rgba(249,115,22,0.15); color: var(--accent); }
+.btn-blue   { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+#theme-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  transition: var(--transition);
+}
+#theme-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── Overview cards ──────────────────────────────────────── */
+#overview-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.card-orange::before { background: var(--accent); }
+.card-blue::before   { background: #3b82f6; }
+.card-green::before  { background: #22c55e; }
+.card-purple::before { background: #a855f7; }
+.card-teal::before   { background: #14b8a6; }
+.card-pink::before   { background: #ec4899; }
+.card-yellow::before { background: #eab308; }
+.card-icon { font-size: 22px; margin-bottom: 8px; color: var(--text3); }
+.card-val  { font-size: 24px; font-weight: 800; font-family: var(--font-mono); margin-bottom: 4px; }
+.card-label{ font-size: 11px; color: var(--text2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ── Table ───────────────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.data-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: middle;
+}
+.data-table tr:hover td { background: var(--bg3); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table strong { color: var(--text); }
+.mono { font-family: var(--font-mono); font-size: 11px; }
+.actions-cell { display: flex; gap: 4px; align-items: center; }
+.empty { text-align: center; color: var(--text3); padding: 32px !important; }
+
+/* ── Badges ──────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.badge-active  { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.badge-error   { background: rgba(239,68,68,0.15);  color: #ef4444; }
+.badge-build   { background: rgba(234,179,8,0.15);  color: #eab308; }
+.badge-off     { background: rgba(107,114,128,0.15); color: #6b7280; }
+.badge-neutral { background: var(--bg3); color: var(--text3); }
+
+/* ── Table wrapper ───────────────────────────────────────── */
+.table-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+/* ── Hypervisor ──────────────────────────────────────────── */
+.hypervisor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.hyp-stat {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+.hyp-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 12px;
+}
+.hyp-bar {
+  height: 6px;
+  background: var(--bg4);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.hyp-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+.hyp-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text2);
+}
+.hyp-val-big {
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ── Loader ──────────────────────────────────────────────── */
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px;
+  color: var(--text3);
+  font-size: 12px;
+}
+.spin {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Empty state ─────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: var(--text3);
+  font-size: 12px;
+  background: var(--bg2);
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+}
+
+/* ── Toast ───────────────────────────────────────────────── */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.3s ease;
+  max-width: 300px;
+  box-shadow: var(--shadow);
+}
+.toast.show { opacity: 1; transform: translateX(0); }
+.toast-error { border-left-color: #ef4444; }
+.toast-success { border-left-color: #22c55e; }
+
+/* ── Quota table ─────────────────────────────────────────── */
+.quota-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ──────────────────────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">OS</div>
+    <h1>OpenStack</h1>
+    <p>192.168.56.104 → Kong</p>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Général</div>
+    <div class="nav-item active" data-section="overview" onclick="nav('overview')">
+      <span class="nav-icon">◈</span> Vue d'ensemble
+    </div>
+    <div class="nav-item" data-section="hypervisors" onclick="nav('hypervisors')">
+      <span class="nav-icon">⬡</span> Hyperviseurs
+    </div>
+    <div class="nav-item" data-section="quotas" onclick="nav('quotas')">
+      <span class="nav-icon">◎</span> Quotas
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Identité</div>
+    <div class="nav-item" data-section="projects" onclick="nav('projects')">
+      <span class="nav-icon">◉</span> Projets
+    </div>
+    <div class="nav-item" data-section="users" onclick="nav('users')">
+      <span class="nav-icon">◎</span> Utilisateurs
+    </div>
+    <div class="nav-item" data-section="keypairs" onclick="nav('keypairs')">
+      <span class="nav-icon">◆</span> Keypairs
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Compute</div>
+    <div class="nav-item" data-section="instances" onclick="nav('instances')">
+      <span class="nav-icon">▣</span> Instances
+    </div>
+    <div class="nav-item" data-section="images" onclick="nav('images')">
+      <span class="nav-icon">▦</span> Images
+    </div>
+    <div class="nav-item" data-section="flavors" onclick="nav('flavors')">
+      <span class="nav-icon">◈</span> Flavors
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Réseau</div>
+    <div class="nav-item" data-section="networks" onclick="nav('networks')">
+      <span class="nav-icon">⬡</span> Réseaux
+    </div>
+    <div class="nav-item" data-section="subnets" onclick="nav('subnets')">
+      <span class="nav-icon">◎</span> Sous-réseaux
+    </div>
+    <div class="nav-item" data-section="routers" onclick="nav('routers')">
+      <span class="nav-icon">◉</span> Routeurs
+    </div>
+    <div class="nav-item" data-section="ports" onclick="nav('ports')">
+      <span class="nav-icon">◆</span> Ports
+    </div>
+    <div class="nav-item" data-section="floating-ips" onclick="nav('floating-ips')">
+      <span class="nav-icon">◈</span> Floating IPs
+    </div>
+    <div class="nav-item" data-section="security-groups" onclick="nav('security-groups')">
+      <span class="nav-icon">▦</span> Security Groups
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ─────────────────────────────────────────────────────────────────── -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title">OpenStack <span style="color:var(--accent)">Dashboard</span></div>
+    <div class="topbar-right">
+      <div class="status-dot"></div>
+      <span class="status-label">Kong 192.168.56.110:8000</span>
+      <button id="theme-btn" onclick="toggleTheme()">☀ Clair</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Vue d'ensemble -->
+    <div class="section active" id="overview">
+      <div class="section-header">
+        <h2 class="section-title">Vue <span>d'ensemble</span></h2>
+        <button class="btn btn-outline" onclick="loadOverview()">↺ Actualiser</button>
+      </div>
+      <div id="overview-cards"><div class="loader"><div class="spin"></div><span>Chargement...</span></div></div>
+    </div>
+
+    <!-- Hyperviseurs -->
+    <div class="section" id="hypervisors">
+      <div class="section-header">
+        <h2 class="section-title">Hyper<span>viseurs</span></h2>
+        <button class="btn btn-outline" onclick="loadHypervisors()">↺ Actualiser</button>
+      </div>
+      <div id="hypervisors-content"></div>
+    </div>
+
+    <!-- Quotas -->
+    <div class="section" id="quotas">
+      <div class="section-header">
+        <h2 class="section-title">Quo<span>tas</span></h2>
+        <button class="btn btn-outline" onclick="loadQuotas()">↺ Actualiser</button>
+      </div>
+      <div class="table-wrap" id="quotas-content"></div>
+    </div>
+
+    <!-- Projets -->
+    <div class="section" id="projects">
+      <div class="section-header">
+        <h2 class="section-title">Pro<span>jets</span></h2>
+        <button class="btn btn-primary" onclick="createProject()">+ Nouveau projet</button>
+      </div>
+      <div class="table-wrap" id="projects-table"></div>
+    </div>
+
+    <!-- Utilisateurs -->
+    <div class="section" id="users">
+      <div class="section-header">
+        <h2 class="section-title">Utili<span>sateurs</span></h2>
+        <button class="btn btn-primary" onclick="createUser()">+ Nouvel utilisateur</button>
+      </div>
+      <div class="table-wrap" id="users-table"></div>
+    </div>
+
+    <!-- Keypairs -->
+    <div class="section" id="keypairs">
+      <div class="section-header">
+        <h2 class="section-title">Key<span>pairs</span></h2>
+      </div>
+      <div class="table-wrap" id="keypairs-table"></div>
+    </div>
+
+    <!-- Instances -->
+    <div class="section" id="instances">
+      <div class="section-header">
+        <h2 class="section-title">Ins<span>tances</span></h2>
+        <button class="btn btn-primary" onclick="createInstance()">+ Nouvelle instance</button>
+      </div>
+      <div class="table-wrap" id="instances-table"></div>
+    </div>
+
+    <!-- Images -->
+    <div class="section" id="images">
+      <div class="section-header">
+        <h2 class="section-title">Ima<span>ges</span></h2>
+      </div>
+      <div class="table-wrap" id="images-table"></div>
+    </div>
+
+    <!-- Flavors -->
+    <div class="section" id="flavors">
+      <div class="section-header">
+        <h2 class="section-title">Fla<span>vors</span></h2>
+        <button class="btn btn-primary" onclick="createFlavor()">+ Nouveau flavor</button>
+      </div>
+      <div class="table-wrap" id="flavors-table"></div>
+    </div>
+
+    <!-- Réseaux -->
+    <div class="section" id="networks">
+      <div class="section-header">
+        <h2 class="section-title">Ré<span>seaux</span></h2>
+        <button class="btn btn-primary" onclick="createNetwork()">+ Nouveau réseau</button>
+      </div>
+      <div class="table-wrap" id="networks-table"></div>
+    </div>
+
+    <!-- Subnets -->
+    <div class="section" id="subnets">
+      <div class="section-header">
+        <h2 class="section-title">Sous-<span>réseaux</span></h2>
+        <button class="btn btn-primary" onclick="createSubnet()">+ Nouveau subnet</button>
+      </div>
+      <div class="table-wrap" id="subnets-table"></div>
+    </div>
+
+    <!-- Routeurs -->
+    <div class="section" id="routers">
+      <div class="section-header">
+        <h2 class="section-title">Rou<span>teurs</span></h2>
+        <button class="btn btn-primary" onclick="createRouter()">+ Nouveau routeur</button>
+      </div>
+      <div class="table-wrap" id="routers-table"></div>
+    </div>
+
+    <!-- Ports -->
+    <div class="section" id="ports">
+      <div class="section-header">
+        <h2 class="section-title">Por<span>ts</span></h2>
+        <button class="btn btn-outline" onclick="loadPorts()">↺ Actualiser</button>
+      </div>
+      <div class="table-wrap" id="ports-table"></div>
+    </div>
+
+    <!-- Floating IPs -->
+    <div class="section" id="floating-ips">
+      <div class="section-header">
+        <h2 class="section-title">Floating <span>IPs</span></h2>
+        <button class="btn btn-primary" onclick="createFip()">+ Allouer FIP</button>
+      </div>
+      <div class="table-wrap" id="fips-table"></div>
+    </div>
+
+    <!-- Security Groups -->
+    <div class="section" id="security-groups">
+      <div class="section-header">
+        <h2 class="section-title">Security <span>Groups</span></h2>
+        <button class="btn btn-primary" onclick="createSG()">+ Nouveau SG</button>
+      </div>
+      <div class="table-wrap" id="sgs-table"></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<div id="toast-container"></div>
+<script src="script.js"></script>
+</body>
+</html>
