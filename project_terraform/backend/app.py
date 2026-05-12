@@ -1,10 +1,20 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
-import subprocess, json, shlex
+import subprocess, json, shlex, os
+from dotenv import load_dotenv
+
+# ── Chargement des variables d'environnement ──────────
+load_dotenv()  # lit automatiquement le fichier .env
+
+# ── Configuration depuis .env ─────────────────────────
+FLASK_HOST  = os.getenv("FLASK_HOST",  "0.0.0.0")
+FLASK_PORT  = int(os.getenv("FLASK_PORT", "5005"))
+FLASK_DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+
+OPENSTACK_HOST = os.getenv("OPENSTACK_HOST", "localhost")
 
 app = Flask(__name__, static_folder='dashboard')
 CORS(app)
-
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
 def run(cmd):
     """Execute microstack.openstack <cmd> -f json and return parsed JSON."""
@@ -392,4 +402,6 @@ def remove_role():
 
 # ─── RUN ──────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5005, debug=True)
+    print(f"[INFO] Starting on {FLASK_HOST}:{FLASK_PORT}")
+    print(f"[INFO] OpenStack backend: {OPENSTACK_HOST}")
+    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=FLASK_DEBUG)
