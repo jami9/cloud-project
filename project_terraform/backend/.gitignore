@@ -1,0 +1,15 @@
+# Clés SSH
+mykey
+mykey.pub
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Env
+.env
+*.env
+!.env.example
