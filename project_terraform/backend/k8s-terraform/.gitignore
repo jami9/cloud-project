@@ -1,0 +1,26 @@
+# Terraform state — contient IDs, IPs, secrets
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfstate.*.backup
+*.tfstate
+
+# Providers téléchargés par terraform init
+.terraform/
+.terraform.lock.hcl
+
+# Fichiers de variables sensibles
+*.tfvars
+!terraform.tfvars.example
+
+# Clés SSH — jamais sur git
+*.pem
+mykey
+mykey.pub
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# Logs
+*.log
+crash.log

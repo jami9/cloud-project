@@ -170,7 +170,7 @@ resource "openstack_networking_secgroup_rule_v2" "internal" {
 # ============================================================
 resource "openstack_compute_keypair_v2" "k8s" {
   name       = "k8s-keypair"
-  public_key = file(var.public_key_path)
+  public_key = file(pathexpand(var.public_key_path))
 }
 
 # ============================================================
