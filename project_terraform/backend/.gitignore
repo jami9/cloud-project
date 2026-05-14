@@ -1,15 +1,15 @@
+# Environnement virtuel Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Variables sensibles
+.env
+*.env
+!.env.example
+
 # Clés SSH
 mykey
 mykey.pub
 *.pem
-
-# Python
-__pycache__/
-*.pyc
-.venv/
-venv/
-
-# Env
-.env
-*.env
-!.env.example
