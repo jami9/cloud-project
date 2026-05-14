@@ -244,60 +244,83 @@ def flavors():
 def images():
     return jsonify(run('image list'))
 
+
 # ══════════════════════════════════════════════════════════════════════════════
-# HYPERVISOR — BUG FIX
-# microstack.openstack hypervisor list  → souvent vide avec microstack
-# microstack.openstack hypervisor stats show  → retourne les stats globales
-# On essaie les deux et on retourne ce qui fonctionne
+# HYPERVISOR 
 # ══════════════════════════════════════════════════════════════════════════════
 @app.route('/api/hypervisors', methods=['GET'])
 def hypervisors():
-    # 1. Essayer hypervisor list
+
+    # 1. Essayer hypervisor list (parfois vide sur MicroStack)
     data = run('hypervisor list')
     if isinstance(data, list) and len(data) > 0:
         return jsonify(data)
 
-    # 2. Fallback: hypervisor stats show  (retourne un objet, pas une liste)
+    # 2. Fallback : hypervisor stats show
+    #    MicroStack retourne un objet avec des clés en snake_case
+    #    On mappe vers le format attendu par le dashboard (PascalCase/avec espaces)
     stats_result = subprocess.run(
         "microstack.openstack hypervisor stats show -f json",
         shell=True, capture_output=True, text=True
     )
+
     if stats_result.returncode == 0 and stats_result.stdout.strip():
         try:
-            stats = json.loads(stats_result.stdout.strip())
-            # Normaliser en liste pour le dashboard
-            return jsonify([{
-                "Hypervisor Hostname": "microstack",
-                "State": "up",
-                "vCPUs": stats.get("count", 0),
-                "vCPUs Used": stats.get("vcpus_used", 0),
-                "Memory MB": stats.get("memory_mb", 0),
-                "Memory MB Used": stats.get("memory_mb_used", 0),
-                "Running VMs": stats.get("running_vms", 0),
-                "Local GB": stats.get("local_gb", 0),
-                "Local GB Used": stats.get("local_gb_used", 0),
-            }])
-        except Exception:
-            pass
+            s = json.loads(stats_result.stdout.strip())
 
-    # 3. Fallback: quota show admin pour avoir les stats de ressources
+            # Calcul RAM en MB
+            total_ram = s.get("memory_mb", 0)
+            used_ram  = s.get("memory_mb_used", 0)
+            free_ram  = s.get("free_ram_mb", 0)
+
+            # Calcul disque en GB
+            total_disk = s.get("local_gb", 0)
+            used_disk  = s.get("local_gb_used", 0)
+            free_disk  = s.get("free_disk_gb", 0)
+
+            # Calcul vCPU
+            total_vcpu = s.get("vcpus", 0)
+            used_vcpu  = s.get("vcpus_used", 0)
+
+            return jsonify([{
+                "Hypervisor Hostname": "microstack-node",
+                "State":              "up",
+                # vCPU
+                "vCPUs":              total_vcpu,
+                "vCPUs Used":         used_vcpu,
+                # RAM
+                "Memory MB":          total_ram,
+                "Memory MB Used":     used_ram,
+                # Disque
+                "Local GB":           total_disk,
+                "Local GB Used":      used_disk,
+                # Infos supplémentaires
+                "Running VMs":        s.get("running_vms", 0),
+                "Free Disk GB":       free_disk,
+                "Free RAM MB":        free_ram,
+                "Current Workload":   s.get("current_workload", 0),
+            }])
+        except Exception as e:
+            return jsonify({"error": f"Parse error: {str(e)}"}), 500
+
+    # 3. Fallback final : quota show
     quota_result = subprocess.run(
         "microstack.openstack quota show admin -f json",
         shell=True, capture_output=True, text=True
     )
     if quota_result.returncode == 0 and quota_result.stdout.strip():
         try:
-            quota = json.loads(quota_result.stdout.strip())
+            q = json.loads(quota_result.stdout.strip())
             return jsonify([{
-                "Hypervisor Hostname": "microstack (quota)",
-                "State": "up",
-                "vCPUs": quota.get("cores", 0),
-                "vCPUs Used": 0,
-                "Memory MB": quota.get("ram", 0),
-                "Memory MB Used": 0,
-                "Running VMs": quota.get("instances", 0),
-                "Local GB": 0,
-                "Local GB Used": 0,
+                "Hypervisor Hostname": "microstack (quota fallback)",
+                "State":              "up",
+                "vCPUs":              q.get("cores", 0),
+                "vCPUs Used":         0,
+                "Memory MB":          q.get("ram", 0),
+                "Memory MB Used":     0,
+                "Local GB":           0,
+                "Local GB Used":      0,
+                "Running VMs":        q.get("instances", 0),
             }])
         except Exception:
             pass
