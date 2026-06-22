@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ================================================================
-#  start.sh — Démarrage complet de la VM OpenStack
+#  start.sh — Démarrage complet de la VM OpenStack + Cluster K8s
 #  Place ce fichier dans /home/microstack/
 #  Usage : bash ~/start.sh
 #
@@ -14,7 +14,9 @@
 #   7. Affiche les stats hyperviseur
 #   8. Affiche l'inventaire complet
 #   9. Démarre Flask (API Backend)
-#  10. Résumé final avec toutes les URLs
+#  10. Valide la connectivité ping + SSH du cluster K8s migré
+#  11. Menu interactif de connexion SSH
+#  12. Résumé final avec toutes les URLs
 # ================================================================
 set -uo pipefail
 
@@ -59,6 +61,16 @@ APP_FILE="${BACKEND_DIR}/app.py"
 FLASK_LOG="/tmp/flask.log"
 FLASK_PID="/tmp/flask.pid"
 VM_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+SSH_KEY="$HOME/.ssh/id_rsa"
+
+# ── Inventaire du cluster K8s migré ──────────────────────────────
+# name | user | floating_ip
+declare -A K8S_NODES=(
+  [master]="user1:10.20.20.141"
+  [worker1]="user2:10.20.20.108"
+  [worker2]="user3:10.20.20.126"
+)
+K8S_NODE_ORDER=(master worker1 worker2)
 
 # ================================================================
 banner
@@ -211,23 +223,18 @@ run_cmd "Keypairs"        keypair list
 # ================================================================
 sep "9. Démarrage Flask API Backend"
 
-# Vérifier que le dossier backend existe
 if [ ! -d "$BACKEND_DIR" ]; then
   fail "Dossier backend introuvable : $BACKEND_DIR"
   warn "Vérifie que le repo est cloné dans ~/cloud-project/"
-  (( FAIL++ )) || true
 else
   pass "Dossier backend trouvé : $BACKEND_DIR"
   cd "$BACKEND_DIR"
 
-  # Vérifier app.py
   if [ ! -f "$APP_FILE" ]; then
     fail "app.py introuvable dans $BACKEND_DIR"
-    (( FAIL++ )) || true
   else
     pass "app.py trouvé"
 
-    # Créer le venv si absent
     if [ ! -d "$VENV_DIR" ]; then
       inf "Création de l'environnement virtuel Python..."
       python3 -m venv "$VENV_DIR"
@@ -236,10 +243,8 @@ else
       pass "Venv existant trouvé"
     fi
 
-    # Activer le venv
     source "${VENV_DIR}/bin/activate"
 
-    # Installer les dépendances si nécessaire
     if ! python3 -c "import flask" 2>/dev/null; then
       inf "Installation des dépendances Python..."
       pip install --quiet flask flask-cors python-dotenv
@@ -249,7 +254,6 @@ else
       pass "Flask ${FLASK_VER} déjà installé"
     fi
 
-    # Arrêter une ancienne instance Flask si elle tourne
     if [ -f "$FLASK_PID" ]; then
       OLD_PID=$(cat "$FLASK_PID")
       if kill -0 "$OLD_PID" 2>/dev/null; then
@@ -260,7 +264,6 @@ else
       rm -f "$FLASK_PID"
     fi
 
-    # Vérifier le .env
     if [ ! -f "${BACKEND_DIR}/.env" ]; then
       warn ".env absent — création avec valeurs par défaut"
       cat > "${BACKEND_DIR}/.env" << 'ENVEOF'
@@ -271,17 +274,14 @@ OPENSTACK_HOST=192.168.128.130
 ENVEOF
     fi
 
-    # Lancer Flask en arrière-plan
     inf "Lancement de Flask..."
     nohup python3 "$APP_FILE" > "$FLASK_LOG" 2>&1 &
     echo $! > "$FLASK_PID"
     sleep 3
 
-    # Vérifier que Flask répond
     FLASK_PORT=$(grep FLASK_PORT "${BACKEND_DIR}/.env" 2>/dev/null | cut -d= -f2 || echo "5005")
     if curl -s --max-time 5 "http://localhost:${FLASK_PORT}/api/servers" > /dev/null 2>&1; then
       pass "Flask opérationnel (PID $(cat $FLASK_PID))"
-      (( PASS++ )) || true
     else
       warn "Flask démarre encore — vérifier dans 10 secondes"
       warn "Logs : tail -f ${FLASK_LOG}"
@@ -290,9 +290,124 @@ ENVEOF
 fi
 
 # ================================================================
-#  10. Résumé final
+#  10. Validation du cluster K8s migré (ping + SSH)
 # ================================================================
-sep "10. Résumé"
+sep "10. Validation cluster Kubernetes migré (ping + SSH)"
+
+declare -A NODE_REACHABLE
+
+for node in "${K8S_NODE_ORDER[@]}"; do
+  entry="${K8S_NODES[$node]}"
+  ssh_user="${entry%%:*}"
+  ip="${entry##*:}"
+
+  echo ""
+  echo -e "  ${BOLD}${CYN}═══ ${node^^} (${ssh_user}@${ip}) ═══${RST}"
+
+  # --- Ping ---
+  if ping -c 3 -W 2 "$ip" > /tmp/ping_${node}.log 2>&1; then
+    LOSS=$(grep -oP '\d+(?=% packet loss)' /tmp/ping_${node}.log || echo "100")
+    if [[ "$LOSS" == "0" ]]; then
+      ok "Ping : 0% perte"
+    else
+      warn "Ping : ${LOSS}% de perte"
+    fi
+  else
+    err "Ping : injoignable"
+  fi
+
+  # --- SSH ---
+  if [[ -f "$SSH_KEY" ]]; then
+    SSH_OUT=$(ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=20 \
+      "${ssh_user}@${ip}" "echo '✔ OK' && hostname" 2>&1)
+    if echo "$SSH_OUT" | grep -q "✔ OK"; then
+      HOSTNAME_REMOTE=$(echo "$SSH_OUT" | tail -1)
+      pass "SSH : connecté (hostname distant: ${HOSTNAME_REMOTE})"
+      NODE_REACHABLE[$node]="OK"
+    else
+      fail "SSH : échec — ${SSH_OUT}"
+      NODE_REACHABLE[$node]="FAIL"
+    fi
+  else
+    warn "Clé SSH introuvable : $SSH_KEY"
+    NODE_REACHABLE[$node]="NO_KEY"
+  fi
+done
+
+echo ""
+echo -e "  ${BOLD}── Résumé validation cluster ──${RST}"
+for node in "${K8S_NODE_ORDER[@]}"; do
+  status="${NODE_REACHABLE[$node]:-INCONNU}"
+  case "$status" in
+    OK)   echo -e "  ${GRN}●${RST} ${node} : ${GRN}opérationnel${RST}" ;;
+    FAIL) echo -e "  ${RED}●${RST} ${node} : ${RED}injoignable${RST}" ;;
+    *)    echo -e "  ${YEL}●${RST} ${node} : ${YEL}${status}${RST}" ;;
+  esac
+done
+
+# ================================================================
+#  11. Menu interactif de connexion SSH
+# ================================================================
+sep "11. Connexion SSH au cluster"
+
+ssh_menu() {
+  while true; do
+    echo ""
+    echo -e "  ${BOLD}${CYN}┌─────────────────────────────────────────┐${RST}"
+    echo -e "  ${BOLD}${CYN}│  Choisir une VM pour connexion SSH      │${RST}"
+    echo -e "  ${BOLD}${CYN}├─────────────────────────────────────────┤${RST}"
+    local i=1
+    local -a menu_nodes=()
+    for node in "${K8S_NODE_ORDER[@]}"; do
+      entry="${K8S_NODES[$node]}"
+      ssh_user="${entry%%:*}"
+      ip="${entry##*:}"
+      status="${NODE_REACHABLE[$node]:-?}"
+      icon="${YEL}?${RST}"
+      [[ "$status" == "OK" ]] && icon="${GRN}✔${RST}"
+      [[ "$status" == "FAIL" ]] && icon="${RED}✘${RST}"
+      printf "  ${BOLD}${CYN}│${RST}  %d) %-10s ${icon} %-10s %-15s ${BOLD}${CYN}│${RST}\n" \
+        "$i" "$node" "$ssh_user" "$ip"
+      menu_nodes+=("$node")
+      ((i++))
+    done
+    echo -e "  ${BOLD}${CYN}│${RST}  0) Quitter / continuer le script        ${BOLD}${CYN}│${RST}"
+    echo -e "  ${BOLD}${CYN}└─────────────────────────────────────────┘${RST}"
+    echo ""
+    read -rp "  Choix [0-${#menu_nodes[@]}] : " choice
+
+    if [[ "$choice" == "0" || -z "$choice" ]]; then
+      inf "Sortie du menu SSH"
+      break
+    fi
+
+    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#menu_nodes[@]} )); then
+      sel_node="${menu_nodes[$((choice-1))]}"
+      entry="${K8S_NODES[$sel_node]}"
+      ssh_user="${entry%%:*}"
+      ip="${entry##*:}"
+      echo ""
+      inf "Connexion à ${sel_node} (${ssh_user}@${ip})…"
+      echo -e "  ${DIM}(tape 'exit' pour revenir au menu)${RST}"
+      echo ""
+      ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${ssh_user}@${ip}"
+    else
+      warn "Choix invalide"
+    fi
+  done
+}
+
+read -rp "  Souhaites-tu te connecter en SSH à une VM maintenant ? [y/N] " want_ssh
+if [[ "$want_ssh" =~ ^[Yy]$ ]]; then
+  ssh_menu
+else
+  skip "Menu SSH ignoré"
+fi
+
+# ================================================================
+#  12. Résumé final
+# ================================================================
+sep "12. Résumé"
 
 echo ""
 echo -e "  ${BOLD}Résultats :${RST}"
@@ -313,6 +428,14 @@ echo -e "  ${BOLD}${CYN}├─────────────────�
 echo -e "  ${BOLD}${CYN}│${RST}  Flask logs   : tail -f ${FLASK_LOG}"
 echo -e "  ${BOLD}${CYN}│${RST}  Flask stop   : kill \$(cat ${FLASK_PID})"
 echo -e "  ${BOLD}${CYN}│${RST}  Flask start  : bash ~/start.sh"
+echo -e "  ${BOLD}${CYN}├──────────────────────────────────────────────────────┤${RST}"
+echo -e "  ${BOLD}${CYN}│  Cluster Kubernetes migré                            │${RST}"
+for node in "${K8S_NODE_ORDER[@]}"; do
+  entry="${K8S_NODES[$node]}"
+  ssh_user="${entry%%:*}"
+  ip="${entry##*:}"
+  printf "  ${BOLD}${CYN}│${RST}  %-9s ssh -i ~/.ssh/id_rsa %s@%-15s\n" "${node}:" "$ssh_user" "$ip"
+done
 echo -e "  ${BOLD}${CYN}└──────────────────────────────────────────────────────┘${RST}"
 echo ""
 
