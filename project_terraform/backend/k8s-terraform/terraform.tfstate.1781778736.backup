@@ -1,0 +1,660 @@
+{
+  "version": 4,
+  "terraform_version": "1.15.2",
+  "serial": 24,
+  "lineage": "00d1faf4-82fe-27ce-ce88-7f5150252f0f",
+  "outputs": {
+    "master_floating_ip": {
+      "value": "10.20.20.141",
+      "type": "string"
+    },
+    "ssh_master": {
+      "value": "ssh -i ~/.ssh/id_rsa user1@10.20.20.141",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "data",
+      "type": "openstack_images_image_v2",
+      "name": "master",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "checksum": "0b503f5c783c80c163364d82b5f91f71",
+            "container_format": "bare",
+            "created_at": "2026-06-18T10:18:23Z",
+            "disk_format": "qcow2",
+            "file": "/v2/images/143dbdf4-4dd8-43e0-b5f0-157392be291f/file",
+            "hidden": false,
+            "id": "143dbdf4-4dd8-43e0-b5f0-157392be291f",
+            "member_status": null,
+            "metadata": {},
+            "min_disk_gb": 0,
+            "min_ram_mb": 0,
+            "most_recent": true,
+            "name": "migrated-k8s-master",
+            "name_regex": null,
+            "owner": "35655d81b8184a108105db2788a3732e",
+            "properties": {
+              "hw_disk_bus": "virtio",
+              "hw_vif_model": "virtio",
+              "os_hash_algo": "sha512",
+              "os_hash_value": "ada8d9dbe5c3e5f3a8db4a9ebb79f887b9b3add8097fde09ba41152ba62e8faa0ecf6f9f84c656d2b1004d79d3dc7072fc6e56a32fb797e0f267318d0e1844e8",
+              "os_type": "linux",
+              "owner_specified.openstack.md5": "0b503f5c783c80c163364d82b5f91f71",
+              "owner_specified.openstack.object": "images/migrated-k8s-master",
+              "owner_specified.openstack.sha256": "21108a6afc220ae16d955474d29f434fa4c4d67fbc1a27d68ce1a8cfd12885b5"
+            },
+            "protected": false,
+            "region": "microstack",
+            "schema": "/v2/schemas/image",
+            "size_bytes": 6609436672,
+            "size_max": null,
+            "size_min": null,
+            "sort_direction": "asc",
+            "sort_key": "name",
+            "tag": null,
+            "tags": [],
+            "updated_at": "2026-06-18T10:20:08Z",
+            "visibility": "public"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0
+        }
+      ]
+    },
+    {
+      "mode": "data",
+      "type": "openstack_networking_network_v2",
+      "name": "external",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "admin_state_up": "true",
+            "all_tags": [],
+            "availability_zone_hints": [],
+            "description": "",
+            "dns_domain": "",
+            "external": true,
+            "id": "cb20bd76-3722-4b33-adcc-c29ba36d116c",
+            "matching_subnet_cidr": null,
+            "mtu": 1500,
+            "name": "external",
+            "network_id": null,
+            "region": "microstack",
+            "segments": [
+              {
+                "network_type": "flat",
+                "physical_network": "physnet1",
+                "segmentation_id": 0
+              }
+            ],
+            "shared": "false",
+            "status": null,
+            "subnets": [
+              "9ad299d9-1d91-4e49-99cd-a4e49c09b1b2"
+            ],
+            "tags": null,
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "transparent_vlan": false
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_compute_keypair_v2",
+      "name": "k8s",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "fingerprint": "97:b7:52:38:d7:b5:8f:94:fd:08:cf:44:78:9c:ca:e6",
+            "id": "k8s-keypair",
+            "name": "k8s-keypair",
+            "private_key": "",
+            "public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCRQDTF9kQSDolsDbmREaaJ+Bi2TecUfMwwFULgepFnBrmfz5ejFzGyp4Uyx5TfxOxnCRsoYOHJYLtyvW78oMBzSq+JZO6UcKhvD1eSUOxytQYx56iBFxMsh43x/TAhoYI4ngqHyMYGZxpOEiXgzkrojmF7DciATLsH0liUbATG9czoExYmJVKOVrJsM9i44gmc/5SHG2T9wKyYUCo/iDPEGmzzNxw/nWLNU8gKW5MqywdBy6gpIFCX/OUeZ5wqf67DJNKuKEoiyarE6MluJPA3yEbcgJwp74iBFWSQ9f7n1xJrHM3eirX4q5v1uwzqYRlNLVpIvhm8wW1uHifLEDFvzWpXcgmZh4t7SjanJ9tvmrF5+Kpv6YsWyVwIF2+c81dJ0Lb+slK3GnFkRDAcfHTGEX2TW0acnMuc9yMR7/Tqhbh0d3BnjT3ZbVmKghER/am/e5qW2iFLCmWWwK/ooJ8HkNLK868CZrSQ2pRboKsF11+rBuIUYTrIva3oAZTxgH9YpdPBePJysABFmleoPVXGHF3UvEVRdH+lpCqAgO74JnpHE/FVVLbzZN7gIYEgOG3zoHv68beVTrHRp5Qc0ISdStg0dpt4c9jytaWNxKMBPOLaTxWVoVFr1EdsWC6zuJH5buymOAkU/6URk4qfp5oOQyk3SuMQRztS8NDfuWNUaw== k8s-migration\n",
+            "region": "microstack",
+            "user_id": "",
+            "value_specs": null
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "private_key"
+              }
+            ]
+          ],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_floatingip_v2",
+      "name": "master",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "address": "10.20.20.141",
+            "all_tags": [],
+            "description": "",
+            "dns_domain": "",
+            "dns_name": "",
+            "fixed_ip": "",
+            "id": "836c0df7-b156-441f-b22d-9765d6e0f44a",
+            "pool": "external",
+            "port_id": "",
+            "region": "microstack",
+            "subnet_id": null,
+            "subnet_ids": null,
+            "tags": [],
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null,
+            "value_specs": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwfX0="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_network_v2",
+      "name": "k8s",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "admin_state_up": true,
+            "all_tags": [],
+            "availability_zone_hints": [],
+            "description": "",
+            "dns_domain": "",
+            "external": false,
+            "id": "98d7bcfe-301f-4cb3-b2e4-aef784bb5b50",
+            "mtu": 1442,
+            "name": "k8s-network",
+            "port_security_enabled": true,
+            "qos_policy_id": "",
+            "region": "microstack",
+            "segments": [
+              {
+                "network_type": "geneve",
+                "physical_network": "",
+                "segmentation_id": 30464
+              }
+            ],
+            "shared": false,
+            "tags": [],
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null,
+            "transparent_vlan": false,
+            "value_specs": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwfX0="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_port_v2",
+      "name": "master",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "admin_state_up": true,
+            "all_fixed_ips": [
+              "192.168.100.20"
+            ],
+            "all_security_group_ids": [
+              "8f1551ed-37ef-414c-8f99-338157fc40aa"
+            ],
+            "all_tags": [],
+            "allowed_address_pairs": [],
+            "binding": [
+              {
+                "host_id": "",
+                "profile": "{}",
+                "vif_details": {},
+                "vif_type": "unbound",
+                "vnic_type": "normal"
+              }
+            ],
+            "description": "",
+            "device_id": "",
+            "device_owner": "",
+            "dns_assignment": [],
+            "dns_name": "",
+            "extra_dhcp_option": [],
+            "fixed_ip": [
+              {
+                "ip_address": "192.168.100.20",
+                "subnet_id": "a9fea448-797d-4d8d-a1ae-3dfa878140bf"
+              }
+            ],
+            "id": "23bb4171-8bfc-4da0-8beb-b5cb04d5012e",
+            "mac_address": "fa:16:3e:8f:96:27",
+            "name": "k8s-master-port",
+            "network_id": "98d7bcfe-301f-4cb3-b2e4-aef784bb5b50",
+            "no_fixed_ip": null,
+            "no_security_groups": null,
+            "port_security_enabled": true,
+            "qos_policy_id": "",
+            "region": "microstack",
+            "security_group_ids": [
+              "8f1551ed-37ef-414c-8f99-338157fc40aa"
+            ],
+            "tags": [],
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null,
+            "value_specs": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "openstack_networking_network_v2.k8s",
+            "openstack_networking_secgroup_v2.k8s",
+            "openstack_networking_subnet_v2.k8s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_router_interface_v2",
+      "name": "k8s",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "force_destroy": false,
+            "id": "9d84a322-f217-49e9-bf0c-30ae97aa2440",
+            "port_id": "9d84a322-f217-49e9-bf0c-30ae97aa2440",
+            "region": "microstack",
+            "router_id": "e4dfeed7-c70d-441b-90e1-9806b7990c48",
+            "subnet_id": "a9fea448-797d-4d8d-a1ae-3dfa878140bf",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "data.openstack_networking_network_v2.external",
+            "openstack_networking_network_v2.k8s",
+            "openstack_networking_router_v2.k8s",
+            "openstack_networking_subnet_v2.k8s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_router_v2",
+      "name": "k8s",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "admin_state_up": true,
+            "all_tags": [],
+            "availability_zone_hints": [],
+            "description": "",
+            "distributed": false,
+            "enable_snat": true,
+            "external_fixed_ip": [
+              {
+                "ip_address": "10.20.20.253",
+                "subnet_id": "9ad299d9-1d91-4e49-99cd-a4e49c09b1b2"
+              }
+            ],
+            "external_gateway": "cb20bd76-3722-4b33-adcc-c29ba36d116c",
+            "external_network_id": "cb20bd76-3722-4b33-adcc-c29ba36d116c",
+            "external_subnet_ids": null,
+            "id": "e4dfeed7-c70d-441b-90e1-9806b7990c48",
+            "name": "k8s-router",
+            "region": "microstack",
+            "tags": [],
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null,
+            "value_specs": null,
+            "vendor_options": []
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "data.openstack_networking_network_v2.external"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_secgroup_rule_v2",
+      "name": "grafana",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "description": "",
+            "direction": "ingress",
+            "ethertype": "IPv4",
+            "id": "65a237ab-6518-4f52-9d7f-5b5e8fd09d32",
+            "port_range_max": 3000,
+            "port_range_min": 3000,
+            "protocol": "tcp",
+            "region": "microstack",
+            "remote_group_id": "",
+            "remote_ip_prefix": "0.0.0.0/0",
+            "security_group_id": "8f1551ed-37ef-414c-8f99-338157fc40aa",
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "openstack_networking_secgroup_v2.k8s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_secgroup_rule_v2",
+      "name": "icmp",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "description": "",
+            "direction": "ingress",
+            "ethertype": "IPv4",
+            "id": "aee42554-4b2a-418d-9086-8fcf7d8e6ad1",
+            "port_range_max": 0,
+            "port_range_min": 0,
+            "protocol": "icmp",
+            "region": "microstack",
+            "remote_group_id": "",
+            "remote_ip_prefix": "0.0.0.0/0",
+            "security_group_id": "8f1551ed-37ef-414c-8f99-338157fc40aa",
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "openstack_networking_secgroup_v2.k8s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_secgroup_rule_v2",
+      "name": "internal",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "description": "",
+            "direction": "ingress",
+            "ethertype": "IPv4",
+            "id": "efcfefa8-c7d9-4ffd-900c-ece43ba2de0d",
+            "port_range_max": 0,
+            "port_range_min": 0,
+            "protocol": "",
+            "region": "microstack",
+            "remote_group_id": "",
+            "remote_ip_prefix": "192.168.100.0/24",
+            "security_group_id": "8f1551ed-37ef-414c-8f99-338157fc40aa",
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "openstack_networking_secgroup_v2.k8s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_secgroup_rule_v2",
+      "name": "k8s_api",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "description": "",
+            "direction": "ingress",
+            "ethertype": "IPv4",
+            "id": "8df9b7f6-3451-463b-9255-b5132a0f62b9",
+            "port_range_max": 6443,
+            "port_range_min": 6443,
+            "protocol": "tcp",
+            "region": "microstack",
+            "remote_group_id": "",
+            "remote_ip_prefix": "0.0.0.0/0",
+            "security_group_id": "8f1551ed-37ef-414c-8f99-338157fc40aa",
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "openstack_networking_secgroup_v2.k8s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_secgroup_rule_v2",
+      "name": "nodeport",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "description": "",
+            "direction": "ingress",
+            "ethertype": "IPv4",
+            "id": "15dbb67a-9319-4a6a-bd14-b17f8527665e",
+            "port_range_max": 32767,
+            "port_range_min": 30000,
+            "protocol": "tcp",
+            "region": "microstack",
+            "remote_group_id": "",
+            "remote_ip_prefix": "0.0.0.0/0",
+            "security_group_id": "8f1551ed-37ef-414c-8f99-338157fc40aa",
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "openstack_networking_secgroup_v2.k8s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_secgroup_rule_v2",
+      "name": "prometheus",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "description": "",
+            "direction": "ingress",
+            "ethertype": "IPv4",
+            "id": "a05a8a3a-6277-4fef-85f6-f7af33e5376e",
+            "port_range_max": 9090,
+            "port_range_min": 9090,
+            "protocol": "tcp",
+            "region": "microstack",
+            "remote_group_id": "",
+            "remote_ip_prefix": "0.0.0.0/0",
+            "security_group_id": "8f1551ed-37ef-414c-8f99-338157fc40aa",
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "openstack_networking_secgroup_v2.k8s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_secgroup_rule_v2",
+      "name": "ssh",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "description": "",
+            "direction": "ingress",
+            "ethertype": "IPv4",
+            "id": "08790b54-6504-4503-96d2-94327950f9cf",
+            "port_range_max": 22,
+            "port_range_min": 22,
+            "protocol": "tcp",
+            "region": "microstack",
+            "remote_group_id": "",
+            "remote_ip_prefix": "0.0.0.0/0",
+            "security_group_id": "8f1551ed-37ef-414c-8f99-338157fc40aa",
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "openstack_networking_secgroup_v2.k8s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_secgroup_v2",
+      "name": "k8s",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "all_tags": [],
+            "delete_default_rules": null,
+            "description": "Security group Kubernetes",
+            "id": "8f1551ed-37ef-414c-8f99-338157fc40aa",
+            "name": "k8s-sg",
+            "region": "microstack",
+            "tags": [],
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjo2MDAwMDAwMDAwMDB9fQ=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "openstack_networking_subnet_v2",
+      "name": "k8s",
+      "provider": "provider[\"registry.terraform.io/terraform-provider-openstack/openstack\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "all_tags": [],
+            "allocation_pool": [
+              {
+                "end": "192.168.100.200",
+                "start": "192.168.100.10"
+              }
+            ],
+            "allocation_pools": [
+              {
+                "end": "192.168.100.200",
+                "start": "192.168.100.10"
+              }
+            ],
+            "cidr": "192.168.100.0/24",
+            "description": "",
+            "dns_nameservers": [
+              "8.8.8.8",
+              "1.1.1.1"
+            ],
+            "enable_dhcp": true,
+            "gateway_ip": "192.168.100.1",
+            "host_routes": [],
+            "id": "a9fea448-797d-4d8d-a1ae-3dfa878140bf",
+            "ip_version": 4,
+            "ipv6_address_mode": "",
+            "ipv6_ra_mode": "",
+            "name": "k8s-subnet",
+            "network_id": "98d7bcfe-301f-4cb3-b2e4-aef784bb5b50",
+            "no_gateway": false,
+            "prefix_length": null,
+            "region": "microstack",
+            "service_types": [],
+            "subnetpool_id": "",
+            "tags": [],
+            "tenant_id": "35655d81b8184a108105db2788a3732e",
+            "timeouts": null,
+            "value_specs": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "openstack_networking_network_v2.k8s"
+          ]
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
