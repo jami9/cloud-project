@@ -1,8 +1,28 @@
-.env
-*.tfstate
-*.tfstate.backup
-terraform.tfvars
-__pycache__/
+# Python
+project_terraform/backend/venv/
+project_terraform/backend/__pycache__/
+project_terraform/backend/*.pyc
 *.pyc
-.terraform/
+__pycache__/
 
+# Logs et PIDs temporaires
+/tmp/flask.log
+/tmp/flask.pid
+*.log
+*.pid
+
+# Fichiers sensibles
+project_terraform/frontend/.env
+project_terraform/backend/.env
+**/.env
+
+# Terraform state (contient des IPs et secrets)
+**/*.tfstate
+**/*.tfstate.backup
+**/*.tfplan
+**/.terraform/
+
+# SSH keys
+*.pem
+*.key
+id_rsa*
