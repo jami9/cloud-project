@@ -26,3 +26,4 @@ project_terraform/backend/.env
 *.pem
 *.key
 id_rsa*
+project_terraform/backend/admin-openrc.sh
