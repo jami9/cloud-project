@@ -28,3 +28,4 @@ variable "worker_ips"   { default = ["192.168.100.11", "192.168.100.12"] }
 
 variable "pod_cidr"    { default = "10.244.0.0/16" }
 variable "worker_ips_str" { default = "" }
+variable "worker_image_name_2" { default = "migrated-k8s-worker2" }

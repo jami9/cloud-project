@@ -1,29 +1,28 @@
-# Python
-project_terraform/backend/venv/
-project_terraform/backend/__pycache__/
-project_terraform/backend/*.pyc
-*.pyc
-__pycache__/
+# Secrets Terraform
+*.tfvars
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+*.tfplan
+deploy*.tfplan
+destroy*.tfplan
 
-# Logs et PIDs temporaires
-/tmp/flask.log
-/tmp/flask.pid
-*.log
-*.pid
-
-# Fichiers sensibles
-project_terraform/frontend/.env
-project_terraform/backend/.env
-**/.env
-
-# Terraform state (contient des IPs et secrets)
-**/*.tfstate
-**/*.tfstate.backup
-**/*.tfplan
-**/.terraform/
-
-# SSH keys
+# Clés SSH
 *.pem
-*.key
+*_rsa
+*_rsa.pub
 id_rsa*
-project_terraform/backend/admin-openrc.sh
+
+# Images et fichiers volumineux
+*.qcow2
+migration_staging/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Divers
+*.bak

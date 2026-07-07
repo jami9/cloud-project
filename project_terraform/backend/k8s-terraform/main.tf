@@ -176,7 +176,7 @@ resource "openstack_networking_port_v2" "worker1" {
   security_group_ids = [openstack_networking_secgroup_v2.k8s.id]
   fixed_ip {
     subnet_id  = openstack_networking_subnet_v2.k8s.id
-    ip_address = "192.168.100.11"
+    ip_address = var.worker_ips[0]
   }
 }
 
@@ -202,10 +202,9 @@ resource "openstack_compute_floatingip_associate_v2" "worker1" {
 
 # ── Worker 2 ──────────────────────────────────────────────────
 data "openstack_images_image_v2" "worker2" {
-  name        = "migrated-k8s-worker2"
+  name        = var.worker_image_name_2
   most_recent = true
 }
-
 resource "openstack_networking_port_v2" "worker2" {
   name               = "k8s-worker2-port"
   network_id         = openstack_networking_network_v2.k8s.id
@@ -213,7 +212,7 @@ resource "openstack_networking_port_v2" "worker2" {
   security_group_ids = [openstack_networking_secgroup_v2.k8s.id]
   fixed_ip {
     subnet_id  = openstack_networking_subnet_v2.k8s.id
-    ip_address = "192.168.100.12"
+    ip_address = var.worker_ips[1]
   }
 }
 
