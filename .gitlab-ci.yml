@@ -1,0 +1,11 @@
+stages:
+  - test
+
+kubernetes-test:
+  stage: test
+  tags:
+    - k8s
+  script:
+    - echo "Test GitLab Runner sur apigateway"
+    - kubectl get nodes
+    - kubectl get pods -A
